@@ -1,0 +1,7 @@
+	# START OF flamework-github-sso stuff
+
+	$GLOBALS['cfg']['github_oauth_key'] = 'READ-FROM-SECRETS';
+	$GLOBALS['cfg']['github_oauth_secret'] = 'READ-FROM-SECRETS';	
+	$GLOBALS['cfg']['github_api_perms'] = 'read';
+
+	# START OF flamework-github-sso stuff
