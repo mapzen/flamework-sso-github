@@ -5,7 +5,7 @@
 	#################################################################
 
 	$GLOBALS['github_api_endpoint'] = '';
-	$GLOBALS['github_oauth_endpoint'] = 'https://dev.github.com/oauth/';
+	$GLOBALS['github_oauth_endpoint'] = 'https://github.com/login/oauth/';
 
 	#################################################################
 
@@ -14,9 +14,11 @@
 		$callback = $GLOBALS['cfg']['abs_root_url'] . $GLOBALS['cfg']['github_oauth_callback'];
 
 		$oauth_key = $GLOBALS['cfg']['github_oauth_key'];
-        	$oauth_redir = urlencode($callback);
+		$oauth_redir = urlencode($callback);
+		$github_scope = $GLOBALS['cfg']['github_api_scope'];
+		$state = crumb_generate('github_auth');
 
-		$url = "{$GLOBALS['github_oauth_endpoint']}authenticate?client_id={$oauth_key}&response_type=code&redirect_uri=$oauth_redir";
+		$url = "{$GLOBALS['github_oauth_endpoint']}authorize?client_id={$oauth_key}&redirect_uri={$oauth_redir}&scope={$github_scope}&state={$state}";
 		return $url;
 	}
 
@@ -25,13 +27,14 @@
 	function github_api_get_auth_token($code){
 
 		$callback = $GLOBALS['cfg']['abs_root_url'] . $GLOBALS['cfg']['github_oauth_callback'];
+		$state = crumb_generate('github_auth');
 
 		$args = array(
 			'client_id' => $GLOBALS['cfg']['github_oauth_key'],
 			'client_secret' => $GLOBALS['cfg']['github_oauth_secret'],
-			'grant_type' => 'authorization_code',
-			'redirect_uri' => $callback,
 			'code' => $code,
+			'redirect_uri' => $callback,
+			'state' => $state
 		);
 
 		$query = http_build_query($args);
@@ -43,17 +46,22 @@
 			return $rsp;
 		}
 
-		$data = json_decode($rsp['body'], 'as hash');
+		$data = array();
+		parse_str($rsp['body'], $data);
+		dumper($data);
 
 		if ((! $data) || (! $data['access_token'])){
-			return not_okay("failed to parse response");
+
+			return array(
+				'ok' => 0,
+				'error' => 'failed to parse response'
+			);
 		}
 
-		return okay(array(
+		return array(
+			'ok' => 1,
 			'oauth_token' => $data['access_token']
-		));
+		);
 	}
 
 	#################################################################
-
-?>
