@@ -9,9 +9,14 @@
 
 	#################################################################
 
-	function github_api_get_auth_url(){
+	function github_api_get_auth_url($redir=''){
 
 		$callback = $GLOBALS['cfg']['abs_root_url'] . $GLOBALS['cfg']['github_oauth_callback'];
+
+		if ($redir){
+			$enc_redir = urlencode($redir);
+			$callback .= "?redir={$enc_redir}";
+		}
 
 		$oauth_key = $GLOBALS['cfg']['github_oauth_key'];
 		$oauth_redir = urlencode($callback);
